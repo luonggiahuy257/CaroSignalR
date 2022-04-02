@@ -1,0 +1,264 @@
+﻿@{
+    ViewData["Title"] = "Caro3x3";
+
+}
+@*<h1>@ViewBag.number</h1>*@
+
+<div class="container" id="main-content">
+    <div class="bd-caro">
+        <form asp-controller="Caro" asp-action="Caro3x3" method="post" class="row g-3">
+            <div class="row mt-4">
+                <div class="col-sm-4">
+                    <label class="align-content-center mt-1">Nhập user:</label>
+                </div>
+                <div class="col-sm-8">
+                    <input type="text" class="form-control" id="userInput" placeholder="Nhập user">
+                </div>
+            </div>
+            <div class="row mt-2">
+                <div class="col-sm-4">
+                    <label class="align-content-center mt-1">Nhập Id phòng:</label>
+                </div>
+                <div class="col-sm-8">
+                    <input type="text" class="form-control" id="room" placeholder="Nhập IdGroup">
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-sm-12 text-right-button mt-2">
+                    <button type="submit" id="joinButton" class="btn btn-primary mb-3">Vào Game</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<section id="caro3x3" style="display:none">
+    <h1 class="game--title">Tic Tac Toe</h1>
+    <div class="game--container">
+        <div data-cell-index="0" id="a0" class="cell"></div>
+        <div data-cell-index="1" id="a1" class="cell"></div>
+        <div data-cell-index="2" id="a2" class="cell"></div>
+        <div data-cell-index="3" id="a3" class="cell"></div>
+        <div data-cell-index="4" id="a4" class="cell"></div>
+        <div data-cell-index="5" id="a5" class="cell"></div>
+        <div data-cell-index="6" id="a6" class="cell"></div>
+        <div data-cell-index="7" id="a7" class="cell"></div>
+        <div data-cell-index="8" id="a8" class="cell"></div>
+    </div>
+    <h2 class="game--status"></h2>
+    <button class="game--restart">Restart Game</button>
+</section>
+
+<div class="fabs">
+    <div class="chat">
+        <div class="chat_header">
+            <div class="chat_option">
+                <span id="chat_head"></span>
+            </div>
+        </div>
+        <div id="chat_converse" class="chat_conversion chat_converse">
+        </div>
+        <div class="fab_field">
+            <a id="fab_camera" class="fab"><i class="zmdi zmdi-camera"></i></a>
+            <a id="fab_send" class="fab"><i class="zmdi zmdi-mail-send"></i></a>
+            <textarea id="messageInput" name="chat_message" placeholder="Send a message" class="chat_field chat_message"></textarea>
+        </div>
+    </div>
+    <a id="prime" class="fab " style="display:none"><i class="prime zmdi zmdi-comment-outline"></i></a>
+</div>
+
+<script src='http://code.jquery.com/jquery-1.11.3.min.js'></script>
+<script src="~/js/signalr/dist/browser/signalr.js"></script>
+<script src="~/js/chat.js"></script>
+
+<script>
+    var connection = new signalR.HubConnectionBuilder().withUrl("/carohub").build();
+    var username= "";
+    
+    connection.on("ReceiveMessage",function(nameId,user, message,room,join){
+        document.getElementById(nameId).innerText = message;
+        if(message == "X"){
+            message = "O";
+        }else {
+              message = "X";
+        }
+        currentPlayerTurn(message);
+    });
+    connection.on("ReceiveMessageGroups",function(user, message, room, join){
+    let msg = message.replace(/&/g, "&amp;").replace(/>/g, "&lt;").replace(/>/g, "&gt;");
+    let encodeMsg = user  + " : " + msg;
+    let userInputs = document.getElementById("userInput").value;
+    console.log('userInputs',userInputs);
+    console.log('user',user);
+    let span = document.createElement("span");
+    if (user == userInputs){
+        span.setAttribute("class","chat_msg_item chat_msg_item_user");
+    }else {
+        span.setAttribute("class","chat_msg_item chat_msg_item_admin");
+    }
+
+    span.textContent = encodeMsg;
+    document.getElementById("chat_converse").appendChild(span);
+    });
+
+    connection.start().then(function(){
+        document.getElementById("fab_send").disabled= false;
+    }).catch(function (err){
+        return cosole.error(err.toString());
+    })
+
+    document.getElementById("fab_send").addEventListener("click", function (event) {
+    let user = document.getElementById("userInput").value;
+    let message = document.getElementById("messageInput").value;
+    let room = document.getElementById("room").value;
+    document.getElementById("messageInput").value = "";
+
+    connection.invoke("SendMessageGroups", user, message, room,false).catch(function (err) {
+        return console.error(err.toString());
+    });
+    event.preventDefault();
+    })
+
+    document.getElementById("joinButton").addEventListener("click", function (event) {
+    var room = document.getElementById("room").value;
+    var user = document.getElementById("userInput").value;
+    var message = document.getElementById("messageInput").value;
+    if(user == "") {
+        alert("Vui lòng nhập user");
+        return;
+    }
+    if(room == "") {
+        alert("Vui lòng nhập phòng");
+        return;
+    }
+
+    document.getElementById("main-content").style.display = "none";
+    document.getElementById("caro3x3").style.display = "block";
+    document.getElementById("prime").style.display = "block";
+    document.getElementById("chat_head").innerHTML = "Player(" + user + ")";
+    connection.invoke("SendMessageGroups", user, message, room,true).catch(function (err) {
+        return console.error(err.toString());
+    });
+    event.preventDefault();
+    })
+
+    
+     let statusDisplay = document.querySelector('.game--status');
+    let gameActive = true;
+    let currentPlayer = "X";
+    let gameState = ["", "", "", "", "", "", "", "", ""];
+    let winningMessage = () => `Player ${currentPlayer} has won!`;
+    let drawMessage = () => `Game ended in a draw!`;
+    let currentPlayerTurn = (currentPlayer) => {
+        statusDisplay.innerHTML = `It's ${currentPlayer}'s turn`;
+    }
+  
+     statusDisplay.innerHTML = `It's X's turn`;
+    const winningConditions = [
+        [0, 1, 2],
+        [3, 4, 5],
+        [6, 7, 8],
+        [0, 3, 6],
+        [1, 4, 7],
+        [2, 5, 8],
+        [0, 4, 8],
+        [2, 4, 6]
+    ];
+
+    function handleCellPlayed(clickedCell, clickedCellIndex) {
+        gameState[clickedCellIndex] = currentPlayer;
+        clickedCell.innerHTML = currentPlayer;
+    }
+
+    function handleResultValidation() {
+        let roundWon = false;
+        for (let i = 0; i <= 7; i++) {
+            const winCondition = winningConditions[i];
+            let a = gameState[winCondition[0]];
+            let b = gameState[winCondition[1]];
+            let c = gameState[winCondition[2]];
+            if (a === '' || b === '' || c === '') {
+                continue;
+            }
+            if (a === b && b === c) {
+                roundWon = true;
+                break
+            }
+        }
+
+        if (roundWon) {
+            statusDisplay.innerHTML = winningMessage();
+            gameActive = false;
+            return;
+        }
+
+        let roundDraw = !gameState.includes("");
+        if (roundDraw) {
+            statusDisplay.innerHTML = drawMessage();
+            gameActive = false;
+            return;
+        }
+
+    }
+
+    function handleCellClick(clickedCellEvent) {
+        let clickedCell = clickedCellEvent.target;
+        let clickedCellIndex = parseInt(clickedCell.getAttribute('data-cell-index'));
+       
+   
+        if (gameState[clickedCellIndex] !== "" || !gameActive) {
+            return;
+        }
+
+        if (isExists() % 2 == 0) {
+            currentPlayer ="X";
+        }else{
+            currentPlayer = "O";
+        }
+    
+        let nameId = clickedCell.getAttribute('id');
+        let room = document.getElementById("room").value;
+       
+        connection.invoke("SendMessage", nameId, "admin", currentPlayer,room, false ).catch(function (err) {
+            return console.error(err.toString());
+        });
+       
+        handleCellPlayed(clickedCell, clickedCellIndex);
+        handleResultValidation();
+    }
+
+    function handleRestartGame() {
+        gameActive = true;
+        currentPlayer = "X";
+        gameState = ["", "", "", "", "", "", "", "", ""];
+        statusDisplay.innerHTML = currentPlayerTurn(currentPlayer);
+        document.querySelectorAll('.cell').forEach(cell => cell.innerHTML = "");
+    }
+
+    document.querySelectorAll('.cell').forEach(cell => cell.addEventListener('click', handleCellClick));
+    document.querySelector('.game--restart').addEventListener('click', handleRestartGame);
+
+                    function isExists(){
+                         let cell = document.getElementsByClassName("cell");
+                         let  count = 0;
+
+                        for (let i = 0; i< cell.length; i += 1){
+                            let textValue = cell[i].innerHTML;
+                            if(textValue != '' ){
+                                count ++;
+                            }
+                        }
+                            return count;
+                    }
+
+            $('#prime').click(function() {
+          toggleFab();
+            });
+
+
+            //Toggle chat and links
+            function toggleFab() {
+          $('.chat').toggleClass('is-visible');
+          $('.fab').toggleClass('is-visible');
+            }
+</script>

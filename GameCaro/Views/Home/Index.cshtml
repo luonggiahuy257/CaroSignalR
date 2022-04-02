@@ -1,0 +1,51 @@
+﻿<body>
+  <div class="fabs">
+  <div class="chat">
+    <div class="chat_header">
+      <div class="chat_option">
+        <span id="chat_head">Jane Doe</span>
+      </div>
+    </div>
+
+    <div id="chat_converse" class="chat_conversion chat_converse">
+      <span class="chat_msg_item chat_msg_item_admin">
+            Hey there! Any question?
+        </span>
+      <span class="chat_msg_item chat_msg_item_user">
+            Hello!</span>
+            <span class="status">20m ago</span>
+      <span class="chat_msg_item chat_msg_item_admin">
+            Hey! Would you like to talk sales, support, or anyone?</span>
+      <span class="chat_msg_item chat_msg_item_user">
+            Lorem Ipsum is simply dummy text of the printing and typesetting industry.</span>
+             <span class="status2">Just now. Not seen yet</span>
+    </div>
+ 
+  
+    <div class="fab_field">
+      <a id="fab_camera" class="fab"><i class="zmdi zmdi-camera"></i></a>
+      <a id="fab_send" class="fab"><i class="zmdi zmdi-mail-send"></i></a>
+      <textarea id="chatSend" name="chat_message" placeholder="Send a message" class="chat_field chat_message"></textarea>
+    </div>
+  </div>
+    <a id="prime" class="fab"><i class="prime zmdi zmdi-comment-outline"></i></a>
+</div>
+
+  <script src='http://code.jquery.com/jquery-1.11.3.min.js'></script>
+
+</body>
+
+
+<script>
+
+$('#prime').click(function() {
+  toggleFab();
+});
+
+
+//Toggle chat and links
+function toggleFab() {
+  $('.chat').toggleClass('is-visible');
+  $('.fab').toggleClass('is-visible');
+}
+</script>
