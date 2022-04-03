@@ -1,0 +1,116 @@
+@{
+    ViewData["Title"] = "Home Page";
+}
+
+
+<input type="text" id="dauvao" value="Public" />
+<input type="text" id="daucuoi" value="{ get; set; }" />
+<br />
+
+<select id="comment">
+    <option></option>
+    <option value='0' selected>comment</option>
+    <option value='1'>type</option>
+    <option value='2'>key</option>
+    <option value='3'>note</option>
+</select>
+
+<select id="type">
+
+    <option></option>
+    <option value='0'>comment</option>
+    <option value='1' selected>type</option>
+    <option value='2'>key</option>
+    <option value='3'>note</option>
+</select>
+
+<select id="key">
+
+    <option></option>
+    <option value='0'>comment</option>
+    <option value='1'>type</option>
+    <option value='2' selected>key</option>
+    <option value='3'>note</option>
+</select>
+
+<select id="note">
+    <option></option>
+    <option value='0'>comment</option>
+    <option value='1'>type</option>
+    <option value='2'>key</option>
+    <option value='3' selected>note</option>
+</select>
+<br />
+
+<textarea id="textareadauvao" style="height:300px;width:300px;">thongbao int number ghichu</textarea>
+<br />
+
+<textarea id="textareadaura" style="height:300px;width:300px;" readonly></textarea>
+
+<input type="button" onclick="make()" value="make" />
+
+<script>
+    function make(){
+        let dauvao = document.getElementById("dauvao").value;
+        let daucuoi = document.getElementById("daucuoi").value;
+
+        let comment = document.getElementById("comment").value;
+        let type = document.getElementById("type").value;
+        let key = document.getElementById("key").value;
+        let note = document.getElementById("note").value;
+        // Neu vitri4 = 0
+        // thongbao int number ghichu
+        let teareadauvao = document.getElementById("textareadauvao").value;
+          let subst = teareadauvao.split('/$\R?^/m');
+            console.log("subst",subst);
+        let substrings = teareadauvao.split(/\s/g);
+        console.log("substrings",substrings);
+        
+        let arrayResult = [];
+        for(let i =0; i < substrings.length; i++){
+            if (i == 0){
+                comment += substrings[i];
+                 arrayResult.push(comment);
+            }
+            if (i == 1){
+                type += substrings[i];
+                arrayResult.push(type);
+            }
+            if (i ==2){
+                key += substrings[i];
+                arrayResult.push(key);
+            }
+            if (i == 3){
+                note += substrings[i];
+                arrayResult.push(note);
+            }
+        }
+
+        for(let j = 0; j < arrayResult.length; j++){
+            if(arrayResult[j].charAt(0) == "0"){
+                comment = arrayResult[j].slice(1);
+            }
+            if(arrayResult[j].charAt(0) == "1"){
+                type = arrayResult[j].slice(1);
+            }
+            if(arrayResult[j].charAt(0) == "2"){
+                key = arrayResult[j].slice(1);
+            }
+            if(arrayResult[j].charAt(0) == "3"){
+                note = arrayResult[j].slice(1);
+            }
+        }
+
+        var resultcommet = `/// <summary> `  + '\n';
+        resultcommet += `<para>${comment}</para>` + '\n';
+
+        if (note != ""){
+            resultcommet += `<para>${note}</para>`  + '\n';
+        }
+           resultcommet += `/// </summary>` +  '\n';
+
+        let result = resultcommet + dauvao +" "+ type +" "+key+" "+ daucuoi;
+        document.getElementById("textareadaura").innerHTML =  result;
+    }
+
+</script>
