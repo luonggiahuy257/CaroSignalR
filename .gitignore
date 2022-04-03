@@ -1,4 +1,6 @@
 
 
-* /bin
-* /obj
+GameCaro/bin
+GameCaro/obj
+
+.vs
